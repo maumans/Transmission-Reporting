@@ -1,100 +1,103 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { Button, TextField, Box, Typography, Paper } from '@mui/material';
+import { Link } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
-        remember: false,
     });
 
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        post(route('login'));
     };
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '100vh',
+                bgcolor: 'background.default',
+            }}
+        >
+            <Head title="Connexion" />
+            
+            <Paper
+                elevation={3}
+                sx={{
+                    p: 4,
+                    width: '100%',
+                    maxWidth: 400,
+                }}
+            >
+                <Typography component="h1" variant="h5" align="center" gutterBottom>
+                    Connexion
+                </Typography>
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+                {status && (
+                    <Typography color="error" align="center" sx={{ mb: 2 }}>
+                        {status}
+                    </Typography>
+                )}
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
+                <form onSubmit={submit}>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
                         id="email"
-                        type="email"
+                        label="Email"
                         name="email"
+                        autoComplete="email"
+                        autoFocus
                         value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
                         onChange={(e) => setData('email', e.target.value)}
+                        error={!!errors.email}
+                        helperText={errors.email}
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
                         name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
+                        label="Mot de passe"
+                        type="password"
+                        id="password"
                         autoComplete="current-password"
+                        value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
+                        error={!!errors.password}
+                        helperText={errors.password}
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={processing}
+                    >
+                        Se connecter
+                    </Button>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
                     {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                            Forgot your password?
-                        </Link>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Link
+                                href={route('password.request')}
+                                style={{ textDecoration: 'none' }}
+                            >
+                                Mot de passe oublié ?
+                            </Link>
+                        </Box>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+                </form>
+            </Paper>
+        </Box>
     );
 }

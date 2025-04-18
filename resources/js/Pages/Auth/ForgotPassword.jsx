@@ -1,8 +1,6 @@
-import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
+import React from 'react';
 import { Head, useForm } from '@inertiajs/react';
+import { Button, TextField, Box, Typography, Paper } from '@mui/material';
 
 export default function ForgotPassword({ status }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -11,45 +9,71 @@ export default function ForgotPassword({ status }) {
 
     const submit = (e) => {
         e.preventDefault();
-
         post(route('password.email'));
     };
 
     return (
-        <GuestLayout>
-            <Head title="Forgot Password" />
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '100vh',
+                bgcolor: 'background.default',
+            }}
+        >
+            <Head title="Mot de passe oublié" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
-            </div>
+            <Paper
+                elevation={3}
+                sx={{
+                    p: 4,
+                    width: '100%',
+                    maxWidth: 400,
+                }}
+            >
+                <Typography component="h1" variant="h5" align="center" gutterBottom>
+                    Mot de passe oublié
+                </Typography>
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+                <Typography variant="body2" align="center" sx={{ mb: 3 }}>
+                    Entrez votre adresse email pour recevoir un lien de réinitialisation.
+                </Typography>
 
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
+                {status && (
+                    <Typography color="success" align="center" sx={{ mb: 2 }}>
+                        {status}
+                    </Typography>
+                )}
 
-                <InputError message={errors.email} className="mt-2" />
+                <form onSubmit={submit}>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Adresse email"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
+                        error={!!errors.email}
+                        helperText={errors.email}
+                    />
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={processing}
+                    >
+                        Envoyer le lien
+                    </Button>
+                </form>
+            </Paper>
+        </Box>
     );
 }

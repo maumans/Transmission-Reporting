@@ -1,13 +1,19 @@
+import AdminLayout from '@/Layouts/AdminLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { Add } from '@mui/icons-material';
+import { Box, Button, Typography } from '@mui/material';
 
-export default function Dashboard() {
+export default function Dashboard({auth}) {
     return (
-        <AuthenticatedLayout
+        <AdminLayout
+            user={auth.user}
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h4" component="h1">
+                        Tableau de bord
+                    </Typography>
+                </Box>
             }
         >
             <Head title="Dashboard" />
@@ -21,6 +27,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }
