@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import {
@@ -35,75 +35,100 @@ import PrintIcon from '@mui/icons-material/Print';
 import { ArrowBack, DateRange } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import TransmissionProgress from '@/Components/TransmissionProgress';
+import DownloadIcon from '@mui/icons-material/Download';
 
-export default function Show({ transmission, auth }) {
+export default function Show({ transmission, auth, success, error }) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+    const [isLoadingValidate, setIsLoadingValidate] = useState(false);
+    const [isLoadingReject, setIsLoadingReject] = useState(false);
+    const [isLoadingTransmission, setIsLoadingTransmission] = useState(false);
+    const [isLoadingCalculate, setIsLoadingCalculate] = useState(null);
+    const [isLoadingPrint, setIsLoadingPrint] = useState(null);
+
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
 
     const handleTransmission = () => {
         setShowConfirmation(true);
     };
 
     const handleConfirmTransmission = () => {
-        setIsLoading(true);
+        setIsLoadingTransmission(true);
         setShowConfirmation(false);
 
         router.get(route('transmission.transmit', transmission.id), {}, {
             onSuccess: () => {
-                setSnackbar({
-                    open: true,
-                    message: 'Transmission effectuée avec succès',
-                    severity: 'success'
-                });
-                setIsLoading(false);
+                setIsLoadingTransmission(false);
             },
             onError: (errors) => {
-                setSnackbar({
-                    open: true,
-                    message: 'Une erreur est survenue lors de la transmission',
-                    severity: 'error'
-                });
-                setIsLoading(false);
+                setIsLoadingTransmission(false);
             }
         });
-    };
-
-    const handleCloseSnackbar = () => {
-        setSnackbar(prev => ({ ...prev, open: false }));
     };
 
     const handleCalculate = (rubrique) => {
+        setIsLoadingCalculate(rubrique.id);
         router.get(route('transmission.calculate', { transmission: transmission.id, rubrique: rubrique.id }), {
             onSuccess: () => {
+                setIsLoadingCalculate(null);
+            },
+            onError: (errors) => {
+                setIsLoadingCalculate(null);
+            }
+        });
+    };
+
+    const handlePrint = (rubrique) => {
+        setIsLoadingPrint(rubrique.id);
+        router.get(route('transmission.print', { transmission: transmission.id, rubrique: rubrique.id }), {
+            onSuccess: () => {
+                setIsLoadingPrint(null);
+            },
+            onError: (errors) => {
+                setIsLoadingPrint(null);
+            }
+        });
+    };
+
+    const handleValidate = () => {
+        setIsLoadingValidate(true);
+        router.get(route('transmission.validate', transmission.id), {
+            onSuccess: () => {
+                setIsLoadingValidate(false);
                 setSnackbar({
                     open: true,
-                    message: 'Calcul effectué avec succès',
+                    message: 'Opération validée avec succès',
                     severity: 'success'
                 });
             },
             onError: (errors) => {
+                setIsLoadingValidate(false);
                 setSnackbar({
                     open: true,
-                    message: 'Une erreur est survenue lors du calcul',
+                    message: 'Une erreur est survenue lors de la validation',
                     severity: 'error'
                 });
             }
         });
     };
 
-    const handlePrint = (operation) => {
-        // Logique pour l'impression
-        console.log('Impression pour l\'opération:', operation);
+    const handleReject = () => {
+        setIsLoadingReject(true);
+        router.get(route('transmission.reject', transmission.id), {
+            onSuccess: () => {
+                setIsLoadingReject(false);
+            },
+            onError: (errors) => {
+                setIsLoadingReject(false);
+            }
+        });
     };
 
     return (
         <AdminLayout
             user={auth.user}
+            success={success}
+            error={error}
             header={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Link href={route('transmission.index')}>
@@ -124,47 +149,59 @@ export default function Show({ transmission, auth }) {
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    {transmission.etat === 'en_attente' && (
+                    {/* {(transmission.etat === 'en_attente' && (auth.isDeclarant || auth.isAdmin)) && (
                         <Link href={route('transmission.edit', transmission.id)}>
                             <Button
                                 variant="contained"
                                 startIcon={<EditIcon />}
+                                disabled={isLoadingEdit}
                             >
                                 Modifier
                             </Button>
                         </Link>
-                    )}
-                    {transmission.etat === 'en_attente' && (
-                        <Link href={route('transmission.validate', transmission.id)}>
-                            <Button
-                                variant="contained"
-                                color="success"
-                                startIcon={<CheckCircleIcon />}
-                            >
-                                Valider
-                            </Button>
-                        </Link>
-                    )}
-                    {transmission.etat === 'en_attente' && (
-                        <Link href={route('transmission.reject', transmission.id)}>
-                            <Button
-                                variant="contained"
-                                color="error"
-                                startIcon={<CancelIcon />}
-                            >
-                                Rejeter
-                            </Button>
-                        </Link>
-                    )}
-                    {transmission.etat === 'validee' && (
+                    )} */}
+                    {(transmission.etat === 'en_attente' && (auth.isValideur || auth.isAdmin)) && (
                         <Button
                             variant="contained"
                             color="success"
-                            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Send />}
-                            onClick={handleTransmission}
-                            disabled={transmission.etat === 'transmise' || isLoading}
+                            startIcon={isLoadingValidate ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
+                            disabled={isLoadingValidate}
+                            onClick={handleValidate}
                         >
-                            {isLoading ? 'Transmission en cours...' : 'Transmettre'}
+                            {isLoadingValidate ? 'Validation en cours...' : 'Valider'}
+                        </Button>
+                    )}
+                    
+                    {(transmission.etat === 'en_attente' && (auth.isValideur || auth.isAdmin)) && (
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={isLoadingReject ? <CircularProgress size={20} color="inherit" /> : <CancelIcon />}
+                            disabled={isLoadingReject}
+                            onClick={handleReject}
+                        >
+                            {isLoadingReject ? 'Rejet en cours...' : 'Rejeter'}
+                        </Button>
+                    )}
+                    {(transmission.etat === 'validee' && (auth.isDeclarant || auth.isAdmin)) && (
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={isLoadingTransmission ? <CircularProgress size={20} color="inherit" /> : <Send />}
+                            onClick={handleTransmission}
+                            disabled={transmission.etat === 'transmise' || isLoadingTransmission}
+                        >
+                            {isLoadingTransmission ? 'Transmission en cours...' : 'Transmettre'}
+                        </Button>
+                    )}
+                    {(auth.isValideur || auth.isAdmin) && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<DownloadIcon />}
+                            onClick={() => window.location.href = route('transmission.download', transmission.id)}
+                        >
+                            Télécharger le fichier
                         </Button>
                     )}
                 </Box>
@@ -230,12 +267,13 @@ export default function Show({ transmission, auth }) {
                             </Grid>
                         </Grid>
                     </Grid>
+                    
                 </Grid>
             </Paper>
 
             {/* Tableau des opérations */}
             {
-                transmission.etat === "transmise"
+                (transmission.etat === "transmise" && ( auth.isDeclarant || auth.isAdmin))
                 &&
                 <Paper sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>
@@ -274,24 +312,27 @@ export default function Show({ transmission, auth }) {
                                         </TableCell>
                                         <TableCell align="right">
                                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                                                <Tooltip title="Calculer">
+                                                {(auth.isDeclarant || auth.isAdmin) && <Tooltip title="Calculer">
                                                     <IconButton
                                                         color="primary"
                                                         onClick={() => handleCalculate(rubrique)}
-                                                        disabled={!rubrique.actif}
+                                                        disabled={!rubrique.actif || isLoadingCalculate === rubrique.id}
                                                     >
-                                                        <CalculateIcon />
+                                                        {isLoadingCalculate === rubrique.id ? <CircularProgress size={24} /> : <CalculateIcon />}
                                                     </IconButton>
                                                 </Tooltip>
-                                                <Tooltip title="Imprimer">
+                                                }
+                                                {(auth.isDeclarant || auth.isAdmin) && <Tooltip title="Imprimer">
                                                     <IconButton
                                                         color="secondary"
                                                         onClick={() => handlePrint(rubrique)}
-                                                        disabled={rubrique.etat !== 'validee'}
+                                                        disabled
+                                                        //disabled={!rubrique.actif || isLoadingPrint === rubrique.id}
                                                     >
-                                                        <PrintIcon />
+                                                        {isLoadingPrint === rubrique.id ? <CircularProgress size={24} /> : <PrintIcon />}
                                                     </IconButton>
                                                 </Tooltip>
+                                                }
                                             </Box>
                                         </TableCell>
                                     </TableRow>
@@ -336,22 +377,6 @@ export default function Show({ transmission, auth }) {
                     </Button>
                 </DialogActions>
             </Dialog>
-
-            {/* Snackbar pour les notifications */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity={snackbar.severity}
-                    sx={{ width: '100%' }}
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
         </AdminLayout>
     );
 } 

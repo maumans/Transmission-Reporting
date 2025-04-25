@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('rubrique_id')->constrained()->onDelete('cascade');
             $table->string('nom')->nullable();
+            $table->string('feuille')->nullable();
             $table->string('groupe');
             $table->string('endpoint');
             $table->string('methode');
@@ -20,7 +21,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
     public function down()
     {
         Schema::dropIfExists('rubrique_apis');

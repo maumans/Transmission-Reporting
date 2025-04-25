@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->text('description')->nullable();
             $table->string('fichier_modele');
-            $table->boolean('status')->default(true);
+            $table->boolean('actif')->default(true);
             $table->foreignId('parent_id')->nullable()->constrained('rubriques')->cascadeOnDelete();
             $table->timestamps();
         });

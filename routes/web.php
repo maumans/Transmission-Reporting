@@ -7,6 +7,7 @@ use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\TransmissionController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ParametreController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,15 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-/* Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-}); */
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
@@ -49,6 +43,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/transmission/{transmission}/reject', [TransmissionController::class, 'reject'])->name('transmission.reject');
     Route::get('/transmission/{transmission}/transmit', [TransmissionController::class, 'transmit'])->name('transmission.transmit');
     Route::get('/transmission/{transmission}/calculate/{rubrique}', [TransmissionController::class, 'calculate'])->name('transmission.calculate');
+    Route::get('/transmission/{transmission}/print/{rubrique}', [TransmissionController::class, 'print'])->name('transmission.print');
+    Route::get('/transmission/{transmission}/download', [TransmissionController::class, 'download'])
+        ->name('transmission.download')
+        ->middleware('role:admin|valideur');
+    Route::get('/transmission/{transmissionId}/calcul-status', [TransmissionController::class, 'getCalculStatus'])->name('transmission.calcul-status');
 
     // Routes des balances
     Route::resource('balance', BalanceController::class);
@@ -72,6 +71,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/operation/{operation}/reject', [OperationController::class, 'reject'])->name('operation.reject');
 
     Route::resource('parametre', ParametreController::class);
+    
+    // Routes de gestion des utilisateurs
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+        Route::resource('user', UserController::class);
+    });
+
+
 
 });
 

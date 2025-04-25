@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {
@@ -20,6 +20,8 @@ import {
     Menu,
     MenuItem,
     Collapse,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -34,6 +36,8 @@ import {
     ExpandMore,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import { Toaster } from 'react-hot-toast';
+import CalculNotification from '@/Components/Notifications/CalculNotification';
 
 const drawerWidth = 240;
 
@@ -137,8 +141,45 @@ export default function AdminLayout({ children, header }) {
     const [open, setOpen] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const user = usePage().props.auth.user;
+    const isAdmin = usePage().props.auth.isAdmin;
+    const { success, error, info } = usePage().props;
     const [openSubmission, setOpenSubmission] = useState(false);
     const [openReport, setOpenReport] = useState(false);
+    const [openParametre, setOpenParametre] = useState(false);
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
+    useEffect(() => {
+        if (success) {
+            setSnackbar({
+                open: true,
+                message: success,
+                severity: 'success'
+            });
+        }
+        if (error) {
+            setSnackbar({
+                open: true,
+                message: error,
+                severity: 'error'
+            });
+        }
+        if (info) {
+            setSnackbar({
+                open: true,
+                message: info,
+                severity: 'info'
+            });
+        }
+    }, [success, error, info]);
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -159,8 +200,21 @@ export default function AdminLayout({ children, header }) {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-                <AppBarStyled position="fixed" open={open}>
+            <Toaster position="top-right" />
+            <CalculNotification />
+            <Box sx={{
+                display: 'flex',
+                minHeight: '100vh',
+                position: 'relative',
+                '& .inertia-progress': {
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 10
+                }
+            }}>
+                <AppBarStyled position="fixed" open={open} sx={{ zIndex: 10 }}>
                     <Toolbar>
                         <IconButton
                             color="inherit"
@@ -174,24 +228,31 @@ export default function AdminLayout({ children, header }) {
                         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                             Transmission Reporting
                         </Typography>
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
+                        <button
+                           
                             onClick={handleMenu}
                             color="inherit"
                         >
                             {user.profile_photo_url ? (
-                                <Avatar
-                                    src={user.profile_photo_url}
-                                    alt={user.name}
-                                    sx={{ width: 32, height: 32 }}
-                                />
+                                <div className='flex gap-2'>
+                                    <div className='text-lg'>
+                                        {user.name}
+                                    </div>
+                                    <Avatar
+                                        src={user.profile_photo_url}
+                                        alt={user.name}
+                                        sx={{ width: 32, height: 32 }}
+                                    />
+                                </div>
                             ) : (
-                                <AccountCircle />
+                                <div className='flex gap-2'>
+                                    <div className='text-lg'>
+                                        {user.name}
+                                    </div>
+                                    <AccountCircle />
+                                </div>
                             )}
-                        </IconButton>
+                        </button>
                         <Menu
                             id="menu-appbar"
                             anchorEl={anchorEl}
@@ -210,7 +271,17 @@ export default function AdminLayout({ children, header }) {
                             <MenuItem component={Link} href={route('profile.edit')} onClick={handleClose}>
                                 Profil
                             </MenuItem>
-                            <MenuItem component={Link} href={route('logout')} method="post" as="button" onClick={handleClose}>
+                            <MenuItem
+                                component={Link}
+                                href={route('logout')}
+                                method="post"
+                                as="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    router.post(route('logout'));
+                                    handleClose();
+                                }}
+                            >
                                 Déconnexion
                             </MenuItem>
                         </Menu>
@@ -223,6 +294,7 @@ export default function AdminLayout({ children, header }) {
                         '& .MuiDrawer-paper': {
                             width: drawerWidth,
                             boxSizing: 'border-box',
+                            zIndex: 11
                         },
                     }}
                     variant="persistent"
@@ -252,32 +324,7 @@ export default function AdminLayout({ children, header }) {
                                 <ListItemText primary="Transmission" />
                             </ListItemButton>
                         </ListItem>
-                        <ListItem disablePadding>
-                            <ListItemButton onClick={() => setOpenSubmission(!openSubmission)}>
-                                <ListItemIcon>
-                                    <DescriptionIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Soumission" />
-                                {openSubmission ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton>
-                        </ListItem>
-                        <Collapse in={openSubmission} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                                <ListItemButton sx={{ pl: 4 }} component={Link} href={route('balance.index')}>
-                                    <ListItemIcon>
-                                        <DescriptionIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="Balance" />
-                                </ListItemButton>
-                                <ListItemButton sx={{ pl: 4 }} component={Link} href={route('annexe.create')}>
-                                    <ListItemIcon>
-                                        <DescriptionIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="Annexe" />
-                                </ListItemButton>
-                            </List>
-                        </Collapse>
-                        <ListItem disablePadding>
+                        {/* <ListItem disablePadding>
                             <ListItemButton onClick={() => setOpenReport(!openReport)}>
                                 <ListItemIcon>
                                     <AssessmentIcon />
@@ -301,18 +348,37 @@ export default function AdminLayout({ children, header }) {
                                     <ListItemText primary="Annexe" />
                                 </ListItemButton>
                             </List>
-                        </Collapse>
-                        <ListItem disablePadding>
-                            <ListItemButton component={Link} href={route('parametre.index')}>
-                                <ListItemIcon>
-                                    <SettingsIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Paramètres" />
-                            </ListItemButton>
-                        </ListItem>
+                        </Collapse> */}
+
+                        {
+                            (isAdmin) && (
+                                <>
+                                    <ListItem disablePadding>
+                                        <ListItemButton onClick={() => setOpenParametre(!openParametre)}>
+                                            <ListItemIcon>
+                                                <DescriptionIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary="Paramètres" />
+                                            {openParametre ? <ExpandLess /> : <ExpandMore />}
+                                        </ListItemButton>
+                                    </ListItem>
+                                    <Collapse in={openParametre} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                            <ListItemButton sx={{ pl: 4 }} component={Link} href={route('user.index')}>
+                                                <ListItemIcon>
+                                                    <DescriptionIcon />
+                                                </ListItemIcon>
+                                                <ListItemText primary="Utilisateurs" />
+                                            </ListItemButton>
+                                        </List>
+                                    </Collapse>
+                                </>
+                            )
+                        }
+
                     </List>
                 </Drawer>
-                <Main open={open}>
+                <Main open={open} sx={{ position: 'relative', zIndex: 1 }}>
                     <DrawerHeader />
                     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                         <Box className="mb-5">
@@ -322,6 +388,27 @@ export default function AdminLayout({ children, header }) {
                     </Container>
                 </Main>
             </Box>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                sx={{
+                    zIndex: 9999,
+                    '& .MuiAlert-root': {
+                        zIndex: 9999
+                    }
+                }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                    variant="filled"
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </ThemeProvider>
     );
 } 

@@ -41,23 +41,22 @@ class TransmissionService
 
                 if ($row->getRowIndex() > 1) {
                     $data[] = [
-                        'chapitre' => $rowData[0] ?? '',
-                        'intituleChapitre' => $rowData[1] ?? '',
-                        'numCompte' => $rowData[2] ?? '',
-                        'intituleCompte' => $rowData[3] ?? '',
-                        'numeroClient' => $rowData[4] ?? '',
-                        'nomClient' => $rowData[5] ?? '',
-                        'codeDevise' => $rowData[6] ?? '',
-                        'soldeDebit' => floatval($rowData[7] ?? 0),
-                        'soldeCredit' => floatval($rowData[8] ?? 0),
-                        'soldeNet' => floatval($rowData[9] ?? 0),
-                        'resident' => $rowData[10] ?? 'RESIDENT',
-                        'codeAgentEconomique' => $rowData[11] ?? '',
-                        'codeSecteurActivite' => $rowData[12] ?? '',
+                        'chapitre' => strval($rowData[0]) ?? '',
+                        'intituleChapitre' => strval($rowData[1]) ?? '',
+                        'numCompte' => strval($rowData[2]) ?? '',
+                        'intituleCompte' => strval($rowData[3]) ?? '',
+                        'numeroClient' => strval($rowData[4]) ?? '',
+                        'nomClient' => strval($rowData[5]) ?? '',
+                        'codeDevise' => strval($rowData[6]) ?? '',
+                        'soldeDebit' => doubleval($rowData[7] ?? 0),
+                        'soldeCredit' => doubleval($rowData[8] ?? 0),
+                        'soldeNet' => doubleval($rowData[9] ?? 0),
+                        'resident' => strval($rowData[10] ?? ''),
+                        'codeAgentEconomique' => strval($rowData[11] ?? ''),
+                        'codeSecteurActivite' => strval($rowData[12] ?? ''),
                     ];
                 }
             }
-
 
             return $data;
         } catch (\Exception $e) {
@@ -66,6 +65,7 @@ class TransmissionService
             throw $e;
         }
     }
+
 
     public function transmit(Operation $operation, array $items)
     {

@@ -224,31 +224,7 @@ class TransmissionController extends Controller
             $rubrique = Rubrique::findOrFail($rubrique_id); */
 
             // Dispatch le job de calcul
-
-            $operation = Operation::where('id', $transmissionId)->first();
-            $rubrique = Rubrique::where('id', $rubrique_id)->first();
-            $bcs = new BanqueCentraleService();
-            $fichier_modele = $rubrique->fichier_modele ?? null;
-
-            if (!$operation || !$rubrique) {
-                $operation->notify(new \App\Notifications\CalculOperationCompleted('error', 'Opération ou rubrique non trouvée.'));
-                throw new \Exception('Opération ou rubrique non trouvée.');
-            }
-
-            
-            foreach (RubriqueApi::where('rubrique_id', $rubrique_id)->where('groupe', 'calcul')->where('actif', true)->get() as $api) {          
-                CalculOperationJob::dispatch([
-                    'rubrique' => $api->rubrique->nom,
-                    'endpoint' => $api->endpoint,
-                    'date_arretee' => $operation->date_arretee,
-                    'statut' => $operation->statut,
-                    'fichier_modele' => $fichier_modele,
-                    'feuille' => $api->feuille,
-                    'methode' => $api->methode
-                ],$bcs);
-            }
-
-           
+            CalculOperationJob::dispatch($transmissionId, $rubrique_id);
 
             return back()->with('info', 'Le calcul est en cours. Vous serez notifié une fois terminé.')
                         ->with('operationId', $transmissionId);

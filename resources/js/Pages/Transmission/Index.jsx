@@ -17,24 +17,30 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Add } from '@mui/icons-material';
 
-export default function Index({ transmissions, auth }) {
+export default function Index({ transmissions, auth, success, error }) {
     return (
         <AdminLayout
             user={auth.user}
+            success={success}
+            error={error}
             header={
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h4" component="h1">
                         Liste des transmissions
                     </Typography>
 
-                    <Link href={route('transmission.create')}>
+                    {
+                        (auth.isAdmin || auth.isDeclarant) && (
+                            <Link href={route('transmission.create')}>
                         <Button
                             variant="contained"
                             startIcon={<Add />}
                         >
                             Nouvelle transmission
-                        </Button>
-                    </Link>
+                                </Button>
+                            </Link>
+                        )
+                    }
                 </Box>
             }
         >

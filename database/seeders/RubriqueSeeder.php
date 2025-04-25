@@ -24,7 +24,7 @@ class RubriqueSeeder extends Seeder
             'nom' => 'SITU',
             'code' => 'SITU',
             'description' => 'Fichier SITU',
-            'fichier_modele' => 'SITU',
+            'fichier_modele' => 'situ/SITU.xlsx',
             'actif' => true,
             'parent_id' => $balance->id
         ]);
@@ -33,7 +33,7 @@ class RubriqueSeeder extends Seeder
             'nom' => 'FINS',
             'code' => 'FINS',
             'description' => 'Fichier FINS',
-            'fichier_modele' => 'FINS',
+            'fichier_modele' => 'fins/FINS.xlsx',
             'actif' => true,
             'parent_id' => $balance->id
         ]);
@@ -123,6 +123,7 @@ class RubriqueSeeder extends Seeder
         // Ajout des APIs d'importation SITU
         for ($i = 1; $i <= 3; $i++) {
             $apis[] = [
+                "feuille"=>'SITU_0'.$i,
                 'endpoint' => "/api/situ/situ0{$i}",
                 'methode' => 'POST',
                 'description' => "Importation de la feuille SITU_0{$i}",
@@ -134,6 +135,7 @@ class RubriqueSeeder extends Seeder
         // Ajout des APIs de calcul SITU
         for ($i = 1; $i <= 3; $i++) {
             $apis[] = [
+                "feuille"=>'SITU_0'.$i,
                 'endpoint' => "/api/calcul/situ/situ0{$i}",
                 'methode' => 'POST',
                 'description' => "Calcul de la feuille SITU_0{$i}",
@@ -161,17 +163,19 @@ class RubriqueSeeder extends Seeder
 
         // Ajout des APIs d'importation FINS
         for ($i = 1; $i <= 17; $i++) {
-            $suffix = '';
+            $pref = $i < 10 ? "0" : "";
             if ($i == 1 || $i == 2 || $i == 7 || $i == 9) {
                 $apis[] = [
-                    'endpoint' => "/api/fins/fins{$i}GNF",
+                    "feuille"=>'FINS_0'.$i.'_GNF',
+                    'endpoint' => "/api/fins/fins{$pref}{$i}GNF",
                     'methode' => 'POST',
                     'description' => "Importation de la feuille FINS_{$i}_GNF",
                     'groupe' => 'Importation',
                     'actif' => true
                 ];
                 $apis[] = [
-                    'endpoint' => "/api/fins/fins{$i}DEV",
+                    "feuille"=>"FINS_{$pref}{$i}_DEV",
+                    'endpoint' => "/api/fins/fins{$pref}{$i}DEV",
                     'methode' => 'POST',
                     'description' => "Importation de la feuille FINS_{$i}_DEV",
                     'groupe' => 'Importation',
@@ -179,7 +183,8 @@ class RubriqueSeeder extends Seeder
                 ];
             } else {
                 $apis[] = [
-                    'endpoint' => "/api/fins/fins{$i}",
+                    "feuille"=>'FINS_0'.$i,
+                    'endpoint' => "/api/fins/fins{$pref}{$i}",
                     'methode' => 'POST',
                     'description' => "Importation de la feuille FINS_{$i}",
                     'groupe' => 'Importation',
@@ -190,17 +195,20 @@ class RubriqueSeeder extends Seeder
 
         // Ajout des APIs de calcul FINS
         for ($i = 1; $i <= 17; $i++) {
+            $pref = $i < 10 ? "0" : "";
             $suffix = '';
             if ($i == 1 || $i == 2 || $i == 7 || $i == 9) {
                 $apis[] = [
-                    'endpoint' => "/api/calcul/fins/fins{$i}GNF",
+                    "feuille"=>"FINS_{$pref}{$i}_GNF",
+                    'endpoint' => "/api/calcul/fins/fins{$pref}{$i}GNF",
                     'methode' => 'POST',
                     'description' => "Calcul de la feuille FINS_{$i}_GNF",
                     'groupe' => 'Calcul',
                     'actif' => true
                 ];
                 $apis[] = [
-                    'endpoint' => "/api/calcul/fins/fins{$i}DEV",
+                    "feuille"=>"FINS_{$pref}{$i}_DEV",
+                    'endpoint' => "/api/calcul/fins/fins{$pref}{$i}DEV",
                     'methode' => 'POST',
                     'description' => "Calcul de la feuille FINS_{$i}_DEV",
                     'groupe' => 'Calcul',
@@ -208,7 +216,8 @@ class RubriqueSeeder extends Seeder
                 ];
             } else {
                 $apis[] = [
-                    'endpoint' => "/api/calcul/fins/fins{$i}",
+                    "feuille"=>"FINS_{$pref}{$i}",
+                    'endpoint' => "/api/calcul/fins/fins{$pref}{$i}",
                     'methode' => 'POST',
                     'description' => "Calcul de la feuille FINS_{$i}",
                     'groupe' => 'Calcul',
@@ -271,10 +280,11 @@ class RubriqueSeeder extends Seeder
 
         // Ajout des APIs IGEC_01 à IGEC_10
         for ($i = 1; $i <= 10; $i++) {
+            $pref = $i < 10 ? "0" : "";
             $apis[] = [
-                'endpoint' => "/api/igec/igec0{$i}",
+                'endpoint' => "/api/igec/igec{$pref}{$i}",
                 'methode' => 'POST',
-                'description' => "Importation de la feuille IGEC_0{$i}",
+                'description' => "Importation de la feuille IGEC_{$pref}{$i}",
                 'groupe' => 'Importation',
                 'actif' => true
             ];
@@ -299,10 +309,13 @@ class RubriqueSeeder extends Seeder
 
         // Ajout des APIs CEFP_01 à CEFP_17
         for ($i = 1; $i <= 17; $i++) {
+            $pref = $i < 10 ? "0" : "";
+
             $apis[] = [
-                'endpoint' => "/api/cefp/cefp_{$i}",
+                "feuille"=>"CEFP_{$pref}{$i}",
+                'endpoint' => "/api/cefp/cefp_{$pref}{$i}",
                 'methode' => 'POST',
-                'description' => "Importation de la feuille CEFP_{$i}",
+                'description' => "Importation de la feuille CEFP_{$pref}{$i}",
                 'groupe' => 'Importation',
                 'actif' => true
             ];

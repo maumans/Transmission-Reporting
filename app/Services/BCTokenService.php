@@ -16,15 +16,13 @@ class BCTokenService
             $banqueCentraleService = new BanqueCentraleService();
 
             $response = $banqueCentraleService->signin(
-                $user->email,
-                $user->email
+                $user->apiEmail,
+                $user->apiPassword
             );
-
-            //dd($user,$response);
 
             return $response['token'] ?? null;
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            dd("Exception lors de la récupération du token BCT: " . $e->getMessage());
             Log::error('Exception lors de la récupération du token BCT: ' . $e->getMessage());
             return null;
         }
@@ -41,6 +39,7 @@ class BCTokenService
             $tokenCreatedAt = Carbon::parse($user->bctoken_created_at);
             return $tokenCreatedAt->addHours(24)->isFuture();
         } catch (\Exception $e) {
+            dd("Exception lors de la vérification du token BCT: " . $e->getMessage());
             Log::error('Erreur lors de la vérification du token BCT: ' . $e->getMessage());
             return false;
         }

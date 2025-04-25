@@ -31,7 +31,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Add, List } from '@mui/icons-material';
 
-export default function Create({ auth, rubriques }) {
+export default function Create({ auth, rubriques, success, error }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         rubrique_id: '',
         date_arretee: new Date("2024-12-31"),
@@ -82,6 +82,8 @@ export default function Create({ auth, rubriques }) {
     return (
         <AdminLayout
             user={auth.user}
+            success={success}
+            error={error}
             header={
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h4" component="h1">
